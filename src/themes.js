@@ -49,6 +49,12 @@ export const themes = [
         light: { fg: '#2e3440', bg: '#eceff4', link: '#5e81ac' },
         dark: { fg: '#d8dee9', bg: '#2e3440', link: '#88c0d0' },
     },
+    {
+        // based on the "darkwarn" VS Code color customizations
+        name: 'darkwarn', label: _('Darkwarn'),
+        light: { fg: '#3a342e', bg: '#f4efe6', link: '#3f7a47' },
+        dark: { fg: '#c5b8a1', bg: '#201b14', link: '#519d5c' },
+    },
 ]
 
 for (const { file, name } of utils.listDir(pkg.configpath('themes'))) try {
