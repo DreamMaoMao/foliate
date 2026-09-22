@@ -26,10 +26,10 @@ If installed, `tracker` (>= 3; `gir1.2-tracker-3.0` in Debian-based distros) and
 
 ### Obtaining the Source
 
-The repo uses git submodules. Before running or installing, make sure you clone the whole thing with `--recurse-submodules`:
+`foliate-js` is vendored in `src/foliate-js`, so a plain clone is enough:
 
 ```
-git clone --recurse-submodules https://github.com/johnfactotum/foliate.git 
+git clone https://github.com/johnfactotum/foliate.git
 ```
 
 Or download the tarball (the `.tar.xz` file) from the [Releases](https://github.com/johnfactotum/foliate/releases) page.

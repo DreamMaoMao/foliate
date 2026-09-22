@@ -24,8 +24,6 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
-        with:
-          submodules: 'true'
 
       - run: sudo apt-get update
       - run: sudo apt-get install build-essential debhelper meson gettext pkg-config libglib2.0-dev gjs appstream libgjs-dev desktop-file-utils
