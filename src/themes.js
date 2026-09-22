@@ -50,8 +50,8 @@ export const themes = [
         dark: { fg: '#d8dee9', bg: '#2e3440', link: '#88c0d0' },
     },
     {
-        // based on the "darkwarn" VS Code color customizations
-        name: 'darkwarn', label: _('Darkwarn'),
+        // based on the "darkwarm" VS Code color customizations
+        name: 'darkwarm', label: _('Darkwarm'),
         light: { fg: '#3a342e', bg: '#f4efe6', link: '#3f7a47', selection: '#c7c1b8' },
         dark: { fg: '#c5b8a1', bg: '#201b14', link: '#519d5c', selection: '#3f3830' },
     },
