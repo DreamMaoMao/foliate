@@ -52,11 +52,23 @@ const getCSS = ({
     lineHeight, justify, hyphenate, invert, theme, overrideFont, userStylesheet,
     mediaActiveClass,
 }) => {
-    // a theme can define its own background color for selected text; otherwise
+    // A theme can define its own background color for selected text; otherwise
     // a translucent version of the link color is used. The text keeps its
-    // color in either case
+    // color in either case.
+    //
+    // The color is specified with a tiny bit of transparency on purpose:
+    // WebKit turns an opaque `::selection` background into an equivalent
+    // translucent color that only looks right when composited over white
+    // (RenderElement::selectionBackgroundColor() calls
+    // RenderTheme::transformSelectionBackgroundColor(), which is
+    // blendWithWhite()). The book is rendered with the light colors and then
+    // inverted by the ::part(filter) filter, with the reader's background
+    // behind it, so that assumption does not hold and the color comes out
+    // too bright. Any color that is not opaque is left alone by WebKit.
     const selection = ({ fg, link, selection }) => `
-            background: ${selection ?? `color-mix(in srgb, ${link} 40%, transparent)`};
+            background: ${selection
+                ? `color-mix(in srgb, ${selection} 99.5%, transparent)`
+                : `color-mix(in srgb, ${link} 40%, transparent)`};
             color: ${fg};`
     return [`
     @namespace epub "http://www.idpf.org/2007/ops";
