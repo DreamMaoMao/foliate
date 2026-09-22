@@ -424,6 +424,13 @@ class Reader {
                     emit({ type: 'show-image', base64, mimetype }))
                 .catch(e => console.error(e)))
 
+        // don't let a selected text be dragged: pressing the left button
+        // inside a selection should start a new selection at the pointer
+        // instead of dragging the selected text away
+        doc.addEventListener('dragstart', e => {
+            if (!doc.getSelection()?.isCollapsed) e.preventDefault()
+        })
+
         doc.addEventListener('pointerup', e => {
             const sel = doc.getSelection()
             const range = getSelectionRange(sel)
