@@ -52,8 +52,8 @@ export const themes = [
     {
         // based on the "darkwarn" VS Code color customizations
         name: 'darkwarn', label: _('Darkwarn'),
-        light: { fg: '#3a342e', bg: '#f4efe6', link: '#3f7a47' },
-        dark: { fg: '#c5b8a1', bg: '#201b14', link: '#519d5c' },
+        light: { fg: '#3a342e', bg: '#f4efe6', link: '#3f7a47', selection: '#cac4b9' },
+        dark: { fg: '#c5b8a1', bg: '#201b14', link: '#519d5c', selection: '#4d4332' },
     },
 ]
 
@@ -67,11 +67,13 @@ for (const { file, name } of utils.listDir(pkg.configpath('themes'))) try {
             fg: theme.light.fg,
             bg: theme.light.bg,
             link: theme.light.link,
+            selection: theme.light.selection,
         },
         dark: {
             fg: theme.dark.fg,
             bg: theme.dark.bg,
             link: theme.dark.link,
+            selection: theme.dark.selection,
         },
     })
 } catch (e) {
@@ -115,5 +117,7 @@ themeCssProvider.load_from_data(`
 
 export const invertTheme = ({ light, dark }) => ({ light, dark, inverted: {
     fg: utils.invertColor(dark.fg),
+    bg: utils.invertColor(dark.bg),
     link: utils.invertColor(dark.link),
+    selection: dark.selection ? utils.invertColor(dark.selection) : undefined,
 } })

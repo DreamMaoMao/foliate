@@ -252,6 +252,18 @@
               </child>
             </object>
           </child>
+          <child>
+            <object class="AdwActionRow">
+              <property name="title" translatable="yes">Selection Menu on Right Click</property>
+              <property name="subtitle" translatable="yes">Only show the menu when right-clicking, instead of popping it up whenever text is selected with the left button</property>
+              <property name="activatable-widget">selection-menu-on-right-click</property>
+              <child>
+                <object class="GtkSwitch" id="selection-menu-on-right-click">
+                  <property name="valign">center</property>
+                </object>
+              </child>
+            </object>
+          </child>
         </object>
       </child>
     </object>

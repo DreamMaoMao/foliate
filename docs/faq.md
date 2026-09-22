@@ -40,15 +40,19 @@ Themes are defined as JSON files. Here is an example theme:
     "light": {
         "fg": "#999999",
         "bg": "#cccccc",
-        "link": "#666666"
+        "link": "#666666",
+        "selection": "#aaaaaa"
     },
     "dark": {
         "fg": "#666666",
         "bg": "#333333",
-        "link": "#777777"
+        "link": "#777777",
+        "selection": "#444444"
     }
 }
 ```
+
+`selection` is optional. It is used as the background color of selected text, which keeps the `fg` color. If it's not set, a translucent version of the `link` color is used instead.
 
 To install themes, you need to put them in `~/.config/com.github.johnfactotum.Foliate/themes/`.
 

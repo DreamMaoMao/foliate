@@ -1081,6 +1081,14 @@ msgstr ""
 msgid "Reduce Animation"
 msgstr ""
 
+#: src/ui/view-preferences-window.ui:257
+msgid "Selection Menu on Right Click"
+msgstr ""
+
+#: src/ui/view-preferences-window.ui:258
+msgid "Only show the menu when right-clicking, instead of popping it up whenever text is selected with the left button"
+msgstr ""
+
 #: data/com.github.johnfactotum.Foliate.desktop.in:5
 msgid "E-Book Viewer"
 msgstr ""

@@ -1099,6 +1099,14 @@ msgstr "行为"
 msgid "Reduce Animation"
 msgstr "减少动画"
 
+#: src/ui/view-preferences-window.ui:257
+msgid "Selection Menu on Right Click"
+msgstr "仅右键弹出选中菜单"
+
+#: src/ui/view-preferences-window.ui:258
+msgid "Only show the menu when right-clicking, instead of popping it up whenever text is selected with the left button"
+msgstr "仅在右键点击时弹出菜单，左键选中文本后不再自动弹出"
+
 #: data/com.github.johnfactotum.Foliate.desktop.in:5
 msgid "E-Book Viewer"
 msgstr "电子书查看器"

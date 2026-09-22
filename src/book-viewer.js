@@ -60,6 +60,7 @@ const ViewSettings = utils.makeDataClass('FoliateViewSettings', {
     'theme': 'string',
     'autohide-cursor': 'boolean',
     'override-font': 'boolean',
+    'selection-menu-on-right-click': 'boolean',
 })
 
 const FontSettings = utils.makeDataClass('FoliateFontSettings', {
@@ -87,7 +88,7 @@ const ViewPreferencesWindow = GObject.registerClass({
         'line-height', 'justify', 'hyphenate', 'gap',
         'max-inline-size', 'max-block-size', 'max-column-count',
         'theme-flow-box',
-        'reduce-animation',
+        'reduce-animation', 'selection-menu-on-right-click',
     ],
 }, class extends Adw.PreferencesDialog {
     constructor(params) {
@@ -110,6 +111,8 @@ const ViewPreferencesWindow = GObject.registerClass({
             'max-column-count': [this._max_column_count, 'value'],
             'animated': [this._reduce_animation, 'active', true],
             'override-font': [this._override_font, 'active'],
+            'selection-menu-on-right-click':
+                [this._selection_menu_on_right_click, 'active'],
         })
 
         const actionGroup = utils.addPropertyActions(this.viewSettings, ['theme'])
@@ -332,6 +335,7 @@ GObject.registerClass({
                 invert: view.invert,
                 theme: view.invert ? invertTheme(theme) : theme,
                 overrideFont: view.override_font,
+                selectionMenuOnRightClick: view.selection_menu_on_right_click,
                 userStylesheet,
             },
             autohideCursor: view.autohide_cursor,

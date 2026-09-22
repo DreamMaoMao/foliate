@@ -51,7 +51,14 @@ const getHTML = async range => {
 const getCSS = ({
     lineHeight, justify, hyphenate, invert, theme, overrideFont, userStylesheet,
     mediaActiveClass,
-}) => [`
+}) => {
+    // a theme can define its own background color for selected text; otherwise
+    // a translucent version of the link color is used. The text keeps its
+    // color in either case
+    const selection = ({ fg, link, selection }) => `
+            background: ${selection ?? `color-mix(in srgb, ${link} 40%, transparent)`};
+            color: ${fg};`
+    return [`
     @namespace epub "http://www.idpf.org/2007/ops";
     @media print {
         html {
@@ -134,6 +141,16 @@ const getCSS = ({
             background: color-mix(in hsl, ${theme.light.fg}, ${theme.light.bg} 85%) !important;
         }` : ''}
     }
+    @media screen {
+        ::selection {
+            ${selection(theme.light)}
+        }
+        @media (prefers-color-scheme: dark) {
+            ::selection {
+                ${selection(invert ? theme.inverted : theme.dark)}
+            }
+        }
+    }
     @media screen and (prefers-color-scheme: dark) {
         ${invert ? `
         /* the book is rendered with the light colors and then inverted by the
@@ -176,6 +193,7 @@ const getCSS = ({
     }
     ${overrideFont ? '* { font-family: revert !important }' : ''}
 ` + userStylesheet]
+}
 
 const frameRect = (frame, rect, sx = 1, sy = 1) => {
     const left = sx * rect.left + frame.left
@@ -394,12 +412,15 @@ class Reader {
                     emit({ type: 'show-image', base64, mimetype }))
                 .catch(e => console.error(e)))
 
-        doc.addEventListener('pointerup', () => {
+        doc.addEventListener('pointerup', e => {
             const sel = doc.getSelection()
             const range = getSelectionRange(sel)
             if (!range) return
             // prevent click event
             doc.addEventListener('click', e => e.stopPropagation(), { capture: true, once: true })
+            // when enabled, only show the menu on right click
+            if (this.style.selectionMenuOnRightClick
+                && e.pointerType !== 'touch' && e.button !== 2) return
             const pos = getPosition(range)
             const value = this.view.getCFI(index, range)
             const lang = getLang(range.commonAncestorContainer)
