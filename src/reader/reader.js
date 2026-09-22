@@ -135,7 +135,22 @@ const getCSS = ({
         }` : ''}
     }
     @media screen and (prefers-color-scheme: dark) {
-        ${invert ? '' : `
+        ${invert ? `
+        /* the book is rendered with the light colors and then inverted by the
+           ::part(filter) filter (see reader.html), so the colors below are
+           the inverted ones. This can't be left out, or books that hard-code
+           their colors, e.g. with p { color: #000 !important }, would end up
+           too bright */
+        html, body {
+            color: ${theme.inverted.fg} !important;
+        }
+        body * {
+            color: inherit !important;
+            border-color: currentColor !important;
+        }
+        a:any-link {
+            color: ${theme.inverted.link} !important;
+        }` : `
         html, body {
             color: ${theme.dark.fg} !important;
             background: none !important;
