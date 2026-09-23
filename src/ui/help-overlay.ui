@@ -36,6 +36,18 @@
         </child>
         <child>
           <object class="AdwShortcutsItem">
+            <property name="accelerator">J</property>
+            <property name="title" translatable="yes">Scroll Down Five Lines</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwShortcutsItem">
+            <property name="accelerator">K</property>
+            <property name="title" translatable="yes">Scroll Up Five Lines</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwShortcutsItem">
             <property name="accelerator">l Right</property>
             <property name="title" translatable="yes">Go Right</property>
           </object>
