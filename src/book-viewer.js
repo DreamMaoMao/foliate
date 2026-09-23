@@ -1039,6 +1039,9 @@ export const BookViewer = GObject.registerClass({
         else {
             bar.search_mode_enabled = true
             this._flap.show_sidebar = true
+            // Ctrl+F searches the current section; choose All Sections from
+            // the search menu to search the whole book
+            this._search_view.settings.scope = 'section'
             this._search_entry.grab_focus()
         }
     }

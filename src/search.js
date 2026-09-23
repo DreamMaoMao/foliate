@@ -43,7 +43,9 @@ GObject.registerClass({
     doSearch = () => this.search().catch(e => console.error(e))
     constructor(params) {
         super(params)
-        this.settings = new SearchSettings({ scope: 'book' })
+        // search in the current section by default; the whole book can still
+        // be searched from the search menu (All Sections)
+        this.settings = new SearchSettings({ scope: 'section' })
         this.settings.connectAll(this.doSearch)
         this.model = new Gtk.SingleSelection({ autoselect: false })
         this.actionGroup = utils.addSimpleActions({
