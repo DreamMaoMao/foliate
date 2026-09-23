@@ -61,7 +61,7 @@ export const themes = [
         // based on the "darkwarm" VS Code color customizations
         name: 'darkwarm', label: _('Darkwarm'),
         light: { fg: '#3a342e', bg: '#f4efe6', link: '#3f7a47', selection: '#c7c1b8' },
-        dark: { fg: '#c5b8a1', bg: '#201b14', link: '#519d5c', selection: '#3f3830', sidebar: '#302a24' },
+        dark: { fg: '#c5b8a1', bg: '#201b14', link: '#519d5c', selection: '#3f3830', sidebar: '#3a342e' },
     },
 ]
 
@@ -105,9 +105,6 @@ themeCssProvider.load_from_data(`
             color: ${theme.light.fg};
             background: ${theme.light.sidebar ?? theme.light.bg};
         }
-        .sidebar-${id}:not(.background) toolbarview {
-            background: rgba(0, 0, 0, .08);
-        }
         .is-dark .${id} {
             color: ${theme.dark.fg};
             background: ${theme.dark.bg};
@@ -115,9 +112,6 @@ themeCssProvider.load_from_data(`
         .is-dark .sidebar-${id}:not(.background) {
             color: ${theme.dark.fg};
             background: ${theme.dark.sidebar ?? theme.dark.bg};
-        }
-        .is-dark .sidebar-${id}:not(.background) toolbarview {
-            background: rgba(255, 255, 255, .05);
         }
         .${id} highlight {
             background: ${theme.light.link};
