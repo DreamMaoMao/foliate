@@ -515,6 +515,21 @@ export class Paginator extends HTMLElement {
             grid-row: 1 / -1;
             overflow: auto;
         }
+        /* a wide, draggable scrollbar whose thumb only shows up when the
+           pointer is over it */
+        :host([flow="scrolled"]) #container::-webkit-scrollbar {
+            width: 14px;
+        }
+        :host([flow="scrolled"]) #container::-webkit-scrollbar-thumb {
+            background: transparent;
+            border-radius: 7px;
+        }
+        :host([flow="scrolled"]) #container:hover::-webkit-scrollbar-thumb {
+            background: rgba(128, 128, 128, .45);
+        }
+        :host([flow="scrolled"]) #container::-webkit-scrollbar-thumb:hover {
+            background: rgba(128, 128, 128, .8);
+        }
         #header {
             grid-column: 3 / 4;
             grid-row: 1;
