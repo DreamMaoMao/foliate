@@ -3,6 +3,14 @@ import GLib from 'gi://GLib'
 import { gettext as _ } from 'gettext'
 import * as utils from './utils.js'
 
+// blend `a` over `b`; `t` is how much of `a` to use
+const mixColor = (a, b, t) => {
+    const ca = utils.RGBA(a), cb = utils.RGBA(b)
+    const hex = n => Math.round((ca[n] * t + cb[n] * (1 - t)) * 255)
+        .toString(16).padStart(2, '0')
+    return `#${hex('red')}${hex('green')}${hex('blue')}`
+}
+
 export const themes = [
     {
         name: 'default', label: _('Default'),
@@ -111,6 +119,36 @@ themeCssProvider.load_from_data(`
         }
         .${id} popover highlight, .is-dark .${id} popover highlight {
             background: @accent_bg_color;
+        }
+        .findbar-${id} {
+            background: ${mixColor(theme.light.fg, theme.light.bg, .08)};
+            color: ${theme.light.fg};
+            border: 1px solid ${mixColor(theme.light.fg, theme.light.bg, .24)};
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+            padding: 5px;
+        }
+        .findbar-${id} entry {
+            background: ${mixColor(theme.light.fg, theme.light.bg, .03)};
+            color: ${theme.light.fg};
+            border: 1px solid ${mixColor(theme.light.fg, theme.light.bg, .20)};
+            border-radius: 4px;
+        }
+        .findbar-${id} entry:focus-within {
+            border-color: ${theme.light.link};
+        }
+        .is-dark .findbar-${id} {
+            background: ${mixColor(theme.dark.fg, theme.dark.bg, .08)};
+            color: ${theme.dark.fg};
+            border: 1px solid ${mixColor(theme.dark.fg, theme.dark.bg, .24)};
+        }
+        .is-dark .findbar-${id} entry {
+            background: ${mixColor(theme.dark.fg, theme.dark.bg, .03)};
+            color: ${theme.dark.fg};
+            border: 1px solid ${mixColor(theme.dark.fg, theme.dark.bg, .20)};
+        }
+        .is-dark .findbar-${id} entry:focus-within {
+            border-color: ${theme.dark.link};
         }
     `
 }).join(''), -1)

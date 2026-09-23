@@ -524,6 +524,8 @@ export const BookViewer = GObject.registerClass({
         'contents-stack', 'contents-stack-switcher',
         'toc-view',
         'search-view', 'search-bar', 'search-entry',
+        'find-bar-revealer', 'find-bar', 'find-entry', 'find-status',
+        'find-prev-button', 'find-next-button', 'find-close-button',
         'annotation-stack', 'annotation-view', 'annotation-search-entry',
         'bookmark-stack', 'bookmark-view',
         'book-info', 'book-cover', 'book-title', 'book-author',
@@ -533,6 +535,10 @@ export const BookViewer = GObject.registerClass({
     #book
     #cover
     #data
+    #findMatches = []
+    #findIndex = -1
+    #findRun = 0
+    #findQuery = ''
     constructor(params) {
         super(params)
         utils.connect(this._view, {
@@ -571,10 +577,12 @@ export const BookViewer = GObject.registerClass({
                 this._sidebar.parent.remove_css_class('sidebar-' + lastThemeClass)
                 this._headerbar_revealer.get_first_child().remove_css_class(lastThemeClass)
                 this._navbar_revealer.get_first_child().remove_css_class(lastThemeClass)
+                this._find_bar.remove_css_class('findbar-' + lastThemeClass)
             }
             this._sidebar.parent.add_css_class('sidebar-' + name)
             this._headerbar_revealer.get_first_child().add_css_class(name)
             this._navbar_revealer.get_first_child().add_css_class(name)
+            this._find_bar.add_css_class('findbar-' + name)
             lastThemeClass = name
         }
         recolorUI(this._view.viewSettings)
@@ -667,6 +675,25 @@ export const BookViewer = GObject.registerClass({
         })
         this._search_entry.add_controller(utils.addShortcuts({
             'Escape': () => this._search_bar.search_mode_enabled = false }))
+        // find in the current section, in a bar at the top of the reader;
+        // independent from the sidebar search, which searches the whole book
+        utils.connect(this._find_entry, {
+            'search-changed': () => this.find(),
+            // Enter goes to the next match, like the sidebar search does
+            'activate': () => this._find_entry.text.trim() === this.#findQuery
+                ? this.findStep(1) : this.find(),
+            'stop-search': () => this.hideFindBar(),
+        })
+        this._find_bar_revealer.connect('notify::child-revealed', revealer => {
+            if (revealer.child_revealed) this._find_entry.grab_focus()
+        })
+        this._find_prev_button.connect('clicked', () => this.findStep(-1))
+        this._find_next_button.connect('clicked', () => this.findStep(1))
+        this._find_close_button.connect('clicked', () => this.hideFindBar())
+        this._find_entry.add_controller(utils.addShortcuts({
+            'F3': () => this.findStep(1),
+            '<shift>F3': () => this.findStep(-1),
+        }))
 
         // navigation
         this._toc_view.connect('go-to-href', (_, href) => {
@@ -741,7 +768,7 @@ export const BookViewer = GObject.registerClass({
                 'toggle-sidebar', 'toggle-search', 'show-location',
                 'toggle-toc', 'toggle-annotations', 'toggle-bookmarks',
                 'preferences', 'help-overlay', 'show-info', 'bookmark',
-                'export-annotations', 'import-annotations',
+                'export-annotations', 'import-annotations', 'find-in-section',
             ],
             props: ['fold-sidebar'],
         })
@@ -750,7 +777,8 @@ export const BookViewer = GObject.registerClass({
         this.insert_action_group('viewer', actions)
         const shortcuts = {
             'F9': 'viewer.toggle-sidebar',
-            '<ctrl>f|slash': 'viewer.toggle-search',
+            '<ctrl>f': 'viewer.find-in-section',
+            '<ctrl><shift>f|slash': 'viewer.toggle-search',
             '<ctrl>l': 'viewer.show-location',
             '<ctrl>i|<alt>Return': 'viewer.show-info',
             '<ctrl>t': 'viewer.toggle-toc',
@@ -762,7 +790,6 @@ export const BookViewer = GObject.registerClass({
             '<ctrl><shift>g': 'search.prev',
             '<ctrl>g': 'search.next',
             '<ctrl>c': 'selection.copy',
-            '<ctrl>f': 'selection.search',
             'F12': 'view.inspector',
             '<ctrl>m': 'view.scrolled',
             '<ctrl>r|F5': 'view.reload',
@@ -1041,6 +1068,61 @@ export const BookViewer = GObject.registerClass({
             this._flap.show_sidebar = true
             this._search_entry.grab_focus()
         }
+    }
+    findInSection() {
+        if (this._find_bar_revealer.reveal_child) this.hideFindBar()
+        else {
+            this._find_bar_revealer.reveal_child = true
+            this.find()
+        }
+    }
+    hideFindBar() {
+        this._find_bar_revealer.reveal_child = false
+        this.#findRun++
+        this.#findMatches = []
+        this.#findIndex = -1
+        this.#updateFindStatus()
+        this._view.clearSearch()
+        this._view.deselect()
+    }
+    find() {
+        const query = this._find_entry.text.trim()
+        const run = ++this.#findRun
+        this.#findQuery = query
+        this.#findMatches = []
+        this.#findIndex = -1
+        this.#updateFindStatus()
+        if (!query) {
+            this._view.clearSearch()
+            return
+        }
+        this.#runFind(run, query, this._search_view.index)
+            .catch(e => console.error(e))
+    }
+    async #runFind(run, query, index) {
+        const iter = await this._view.search({ query, index })
+        for await (const result of iter) {
+            if (run !== this.#findRun) return
+            if (result === 'done' || 'progress' in result) continue
+            this.#findMatches.push(result.cfi)
+        }
+        if (run !== this.#findRun) return
+        if (this.#findMatches.length) {
+            this.#findIndex = 0
+            this._view.select(this.#findMatches[0])
+        }
+        this.#updateFindStatus()
+    }
+    findStep(delta) {
+        const n = this.#findMatches.length
+        if (!n) return
+        this.#findIndex = (this.#findIndex + delta + n) % n
+        this._view.select(this.#findMatches[this.#findIndex])
+        this.#updateFindStatus()
+    }
+    #updateFindStatus() {
+        const n = this.#findMatches.length
+        this._find_status.label = n ? `${this.#findIndex + 1}/${n}` : ''
     }
     showLocation() {
         this._navbar.showLocation()

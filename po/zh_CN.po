@@ -1099,6 +1099,18 @@ msgstr "行为"
 msgid "Reduce Animation"
 msgstr "减少动画"
 
+#: src/ui/book-viewer.ui
+msgid "Find in This Section…"
+msgstr "在本章节中查找…"
+
+#: src/ui/book-viewer.ui
+msgid "Previous Match"
+msgstr "上一个匹配"
+
+#: src/ui/book-viewer.ui
+msgid "Next Match"
+msgstr "下一个匹配"
+
 #: src/ui/view-preferences-window.ui:257
 msgid "Selection Menu on Right Click"
 msgstr "仅右键弹出选中菜单"

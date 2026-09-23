@@ -1081,6 +1081,18 @@ msgstr ""
 msgid "Reduce Animation"
 msgstr ""
 
+#: src/ui/book-viewer.ui
+msgid "Find in This Section…"
+msgstr ""
+
+#: src/ui/book-viewer.ui
+msgid "Previous Match"
+msgstr ""
+
+#: src/ui/book-viewer.ui
+msgid "Next Match"
+msgstr ""
+
 #: src/ui/view-preferences-window.ui:257
 msgid "Selection Menu on Right Click"
 msgstr ""
