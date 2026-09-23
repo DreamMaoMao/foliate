@@ -1095,13 +1095,11 @@ export const BookViewer = GObject.registerClass({
     async #updateWordCount() {
         // read through the iterator bridge, which is the one that carries
         // values back from the reader; exec() is fire and forget
-        const iter = await this._view.countChars()
-        for await (const value of iter) {
-            const n = Number(value)
-            if (Number.isFinite(n))
-                this._word_count.label = _('Words in This Chapter: %d').replace('%d', n)
-            break
-        }
+        const it = await this._view.countChars()
+        const { value } = await it.next()
+        const n = Number(value?.value ?? value)
+        if (Number.isFinite(n)) this._word_count.label = `本章字数：${n}`
+        else console.debug('word count:', value)
     }
     // shift+J/K: scroll five lines, by repeating the view's own one-line scroll
     #scrollLines(dir) {

@@ -654,9 +654,8 @@
                         <object class="GtkLabel" id="word-count">
                           <property name="margin-start">6</property>
                           <property name="margin-end">12</property>
-                          <property name="label" translatable="yes">Words in This Chapter: 0</property>
+                          <property name="label">本章字数：0</property>
                           <style>
-                            <class name="dim-label"/>
                             <class name="numeric"/>
                           </style>
                         </object>
