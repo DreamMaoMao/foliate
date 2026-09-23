@@ -524,6 +524,9 @@
                   <child>
                     <object class="AdwHeaderBar">
                       <property name="valign">start</property>
+                      <property name="title-widget">
+                        <object class="GtkLabel" id="word-count"/>
+                      </property>
                       <child type="start">
                         <object class="GtkToggleButton">
                           <property name="icon-name">sidebar-show-symbolic</property>

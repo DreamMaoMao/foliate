@@ -540,6 +540,13 @@ class Reader {
     scrollBy([x, y]) {
         return this.view.renderer.scrollBy?.(x, y)
     }
+    // character count of the current chapter, like countch.py: every
+    // non-whitespace character counts as one
+    countChars() {
+        const { doc } = this.view.renderer?.getContents?.()[0] ?? {}
+        const text = doc?.body?.innerText ?? ''
+        return text.replace(/\s+/g, '').length
+    }
     // select the given CFI and put it in the middle of the viewport, in one
     // go: doing it in two steps scrolls twice and flickers
     async centerCfi(cfi) {

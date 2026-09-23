@@ -1078,6 +1078,12 @@ msgid "Behavior"
 msgstr ""
 
 #: src/ui/view-preferences-window.ui:246
+msgid "Words in This Chapter: %d"
+msgstr "本章字数：%d"
+
+msgid "Pin Top Bar"
+msgstr "固定顶栏"
+
 msgid "Reduce Animation"
 msgstr ""
 

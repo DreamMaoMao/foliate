@@ -100,6 +100,9 @@
     <key name="selection-menu-on-right-click" type="b">
       <default>true</default>
     </key>
+    <key name="pin-headerbar" type="b">
+      <default>false</default>
+    </key>
   </schema>
 
   <schema id="com.github.johnfactotum.Foliate.viewer.font"

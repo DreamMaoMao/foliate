@@ -61,6 +61,7 @@ const ViewSettings = utils.makeDataClass('FoliateViewSettings', {
     'autohide-cursor': 'boolean',
     'override-font': 'boolean',
     'selection-menu-on-right-click': 'boolean',
+    'pin-headerbar': 'boolean',
 })
 
 const FontSettings = utils.makeDataClass('FoliateFontSettings', {
@@ -89,6 +90,7 @@ const ViewPreferencesWindow = GObject.registerClass({
         'max-inline-size', 'max-block-size', 'max-column-count',
         'theme-flow-box',
         'reduce-animation', 'selection-menu-on-right-click',
+        'pin-headerbar',
     ],
 }, class extends Adw.PreferencesDialog {
     constructor(params) {
@@ -113,6 +115,7 @@ const ViewPreferencesWindow = GObject.registerClass({
             'override-font': [this._override_font, 'active'],
             'selection-menu-on-right-click':
                 [this._selection_menu_on_right_click, 'active'],
+            'pin-headerbar': [this._pin_headerbar, 'active'],
         })
 
         const actionGroup = utils.addPropertyActions(this.viewSettings, ['theme'])
@@ -401,6 +404,7 @@ GObject.registerClass({
     search(x) { return this.#webView.iter('reader.view.search', x) }
     clearSearch() { return this.#webView.iter('reader.view.clearSearch') }
     centerCfi(x) { return this.#exec('reader.centerCfi', x) }
+    countChars() { return this.#exec('reader.countChars') }
     showAnnotation(x) { return this.#exec('reader.view.showAnnotation', x) }
     addAnnotation(x) { return this.#exec('reader.view.addAnnotation', x) }
     deleteAnnotation(x) { return this.#exec('reader.view.deleteAnnotation', x) }
@@ -639,6 +643,15 @@ export const BookViewer = GObject.registerClass({
         // revealers
         const autohideHeaderbar = autohide(this._headerbar_revealer,
             () => this._view_popover.visible)
+        // pinned: keep the top bar always visible
+        const pinHeaderbar = () => this._view.viewSettings.pin_headerbar
+        this._view.viewSettings.connect('notify::pin-headerbar', () => {
+            if (pinHeaderbar()) this._headerbar_revealer.reveal_child = true
+        })
+        this._headerbar_revealer.connect('notify::reveal-child', revealer => {
+            if (pinHeaderbar() && !revealer.reveal_child) revealer.reveal_child = true
+        })
+        if (pinHeaderbar()) this._headerbar_revealer.reveal_child = true
         const autohideNavbar = autohide(this._navbar_revealer,
             () => this._navbar.shouldStayVisible)
         this._view_popover.connect('closed', autohideHeaderbar.hide)
@@ -898,6 +911,9 @@ export const BookViewer = GObject.registerClass({
         this._toc_view.setCurrent(tocItem?.id)
         this._search_view.index = section.current
         this._navbar.update(payload)
+        this._view.countChars()
+            .then(n => { if (typeof n === 'number') this._word_count.label = _('Words in This Chapter: %d').replace('%d', n) })
+            .catch(e => console.error(e))
         this._bookmark_view.update(payload)
         this._annotation_view.update(payload)
         if (this.#data) {
