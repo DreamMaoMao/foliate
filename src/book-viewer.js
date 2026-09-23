@@ -911,6 +911,9 @@ export const BookViewer = GObject.registerClass({
         this._toc_view.setCurrent(tocItem?.id)
         this._search_view.index = section.current
         this._navbar.update(payload)
+        if (this.#headerLabels().title)
+            this.#headerLabels().title.label =
+                (typeof tocItem?.label === 'string' ? tocItem.label : '')
         this.#updateWordCount().catch(e => console.error(e))
         this._bookmark_view.update(payload)
         this._annotation_view.update(payload)
@@ -1092,17 +1095,23 @@ export const BookViewer = GObject.registerClass({
             this._search_entry.grab_focus()
         }
     }
+    // header bar title widget: chapter name, then the word count
+    #headerLabels() {
+        const box = this._headerbar_revealer.get_first_child()?.title_widget
+        const title = box?.get_first_child() ?? null
+        return { title, count: title?.get_next_sibling() ?? null }
+    }
     async #updateWordCount() {
         // read through the iterator bridge, which is the one that carries
         // values back from the reader; exec() is fire and forget
         // the template child lookup for this id does not resolve, so find the
         // label by its position: it is the navbar's next sibling
-        const label = this._word_count ?? this._navbar.get_next_sibling()
+                const { count: label } = this.#headerLabels()
         if (!label) return
         const it = await this._view.countChars()
         const { value } = await it.next()
         const n = Number(value?.value ?? value)
-        if (Number.isFinite(n)) label.label = `本章字数：${n}`
+        if (Number.isFinite(n)) label.label = `（本章字数：${n}）`
         else console.debug('word count:', value)
     }
     // shift+J/K: scroll five lines, by repeating the view's own one-line scroll
