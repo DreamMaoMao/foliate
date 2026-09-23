@@ -525,7 +525,9 @@
                     <object class="AdwHeaderBar">
                       <property name="valign">start</property>
                       <property name="title-widget">
-                        <object class="GtkLabel" id="word-count"/>
+                        <object class="GtkLabel" id="word-count">
+                          <property name="label" translatable="yes">Words in This Chapter: 0</property>
+                        </object>
                       </property>
                       <child type="start">
                         <object class="GtkToggleButton">

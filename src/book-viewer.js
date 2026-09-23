@@ -912,7 +912,11 @@ export const BookViewer = GObject.registerClass({
         this._search_view.index = section.current
         this._navbar.update(payload)
         this._view.countChars()
-            .then(n => { if (typeof n === 'number') this._word_count.label = _('Words in This Chapter: %d').replace('%d', n) })
+            .then(result => {
+                const n = Number(result?.value ?? result)
+                if (!Number.isFinite(n)) return console.debug('char count not a number:', result)
+                this._word_count.label = _('Words in This Chapter: %d').replace('%d', n)
+            })
             .catch(e => console.error(e))
         this._bookmark_view.update(payload)
         this._annotation_view.update(payload)
