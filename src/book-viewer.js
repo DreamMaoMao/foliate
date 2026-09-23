@@ -807,6 +807,8 @@ export const BookViewer = GObject.registerClass({
             'n|Page_Down|KP_Page_Down|space': 'view.next',
             'k|Up|KP_Up': 'view.scroll-up',
             'j|Down|KP_Down': 'view.scroll-down',
+            'K': () => this.#scrollLines(-1),
+            'J': () => this.#scrollLines(1),
             'h|Left|KP_Left': 'view.go-left',
             'l|Right|KP_Right': 'view.go-right',
             '<alt>Left|<alt>KP_Left': 'view.back',
@@ -1075,6 +1077,11 @@ export const BookViewer = GObject.registerClass({
             this._flap.show_sidebar = true
             this._search_entry.grab_focus()
         }
+    }
+    // shift+J/K: scroll five lines, by repeating the view's own one-line scroll
+    #scrollLines(dir) {
+        const action = dir > 0 ? 'view.scroll-down' : 'view.scroll-up'
+        for (let i = 0; i < 5; i++) this.activate_action(action, null)
     }
     async findInSection() {
         // the shortcut is registered on both the window and the web view, so
