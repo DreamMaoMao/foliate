@@ -524,11 +524,6 @@
                   <child>
                     <object class="AdwHeaderBar">
                       <property name="valign">start</property>
-                      <property name="title-widget">
-                        <object class="GtkLabel" id="word-count">
-                          <property name="label" translatable="yes">Words in This Chapter: 0</property>
-                        </object>
-                      </property>
                       <child type="start">
                         <object class="GtkToggleButton">
                           <property name="icon-name">sidebar-show-symbolic</property>
@@ -648,7 +643,25 @@
                     <object class="GtkSeparator"/>
                   </child>
                   <child>
-                    <object class="FoliateNavBar" id="navbar"/>
+                    <object class="GtkBox">
+                      <property name="orientation">horizontal</property>
+                      <child>
+                        <object class="FoliateNavBar" id="navbar">
+                          <property name="hexpand">true</property>
+                        </object>
+                      </child>
+                      <child>
+                        <object class="GtkLabel" id="word-count">
+                          <property name="margin-start">6</property>
+                          <property name="margin-end">12</property>
+                          <property name="label" translatable="yes">Words in This Chapter: 0</property>
+                          <style>
+                            <class name="dim-label"/>
+                            <class name="numeric"/>
+                          </style>
+                        </object>
+                      </child>
+                    </object>
                   </child>
                 </object>
               </child>
