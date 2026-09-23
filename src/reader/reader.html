@@ -3,6 +3,13 @@
 <meta name="color-scheme" content="light dark">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' blob:; script-src 'self'; style-src 'self' blob: 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' blob: data:; frame-src blob: data:; object-src blob: data:; form-action 'none';">
 <style>
+html, body, foliate-view {
+    scrollbar-width: none;
+}
+::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
 html {
     /* TODO: high contrast mode */
     --hover: rgba(0, 0, 0, .03);

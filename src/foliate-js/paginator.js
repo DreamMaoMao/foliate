@@ -515,6 +515,17 @@ export class Paginator extends HTMLElement {
             grid-row: 1 / -1;
             overflow: auto;
         }
+        /* hide the scrollbar in scrolled mode: it can't be dragged reliably,
+           so wheel/keys are used instead */
+        :host([flow="scrolled"]), :host([flow="scrolled"]) * {
+            scrollbar-width: none;
+        }
+        :host([flow="scrolled"])::-webkit-scrollbar,
+        :host([flow="scrolled"]) ::-webkit-scrollbar,
+        :host([flow="scrolled"]) *::-webkit-scrollbar {
+            width: 0;
+            height: 0;
+        }
         /* a wide, draggable scrollbar whose thumb only shows up when the
            pointer is over it */
         :host([flow="scrolled"]) #container::-webkit-scrollbar {
