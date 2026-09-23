@@ -122,8 +122,22 @@ const ApplicationWindow = GObject.registerClass({
             }
         })
 
-        if (this.file) this.openFile(this.file)
-        else this.showLibrary()
+        // open the book that was passed, if it is actually there; otherwise
+        // fall back to the last book that was opened, and only show the
+        // library when there is nothing to fall back to
+        const file = this.file
+        const exists = file && GLib.file_test(file.get_path() ?? '', GLib.FileTest.EXISTS)
+        if (exists) this.openFile(file)
+        else {
+            let last = null
+            try {
+                const [, contents] = GLib.file_get_contents(pkg.configpath('last-book'))
+                if (contents) last = new TextDecoder().decode(contents).trim()
+            } catch (e) { /* not recorded yet */ }
+            if (last && GLib.file_test(last, GLib.FileTest.EXISTS))
+                this.openFile(Gio.File.new_for_path(last))
+            else this.showLibrary()
+        }
     }
     add_toast(toast) {
         this.content.add_toast(toast)
@@ -164,6 +178,11 @@ const ApplicationWindow = GObject.registerClass({
         }
         this.#stack.transition_type = Gtk.StackTransitionType.SLIDE_LEFT
         this.#stack.visible_child = this.#bookViewer
+        // remember it, so that starting without a book reopens this one
+        try {
+            GLib.file_set_contents(pkg.configpath('last-book'),
+                file?.get_path?.() ?? file?.get_uri?.() ?? '')
+        } catch (e) { console.error(e) }
         this.#bookViewer.open(file)
     }
     openOPDS(uri) {
