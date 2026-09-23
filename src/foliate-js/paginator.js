@@ -538,8 +538,7 @@ export class Paginator extends HTMLElement {
             right: 0;
             width: 14px;
             height: 100%;
-            opacity: 0;
-            transition: opacity .15s;
+            opacity: 1;
         }
         #scrollbar.visible, #scrollbar.dragging {
             opacity: 1;
