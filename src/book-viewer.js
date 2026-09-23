@@ -1081,7 +1081,8 @@ export const BookViewer = GObject.registerClass({
     // shift+J/K: scroll five lines, by repeating the view's own one-line scroll
     #scrollLines(dir) {
         const action = dir > 0 ? 'view.scroll-down' : 'view.scroll-up'
-        for (let i = 0; i < 5; i++) this.activate_action(action, null)
+        // the 'view' group lives on the book view widget, so activate it there
+        for (let i = 0; i < 5; i++) this._view.activate_action(action, null)
     }
     async findInSection() {
         // the shortcut is registered on both the window and the web view, so
