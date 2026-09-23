@@ -101,7 +101,7 @@ themeCssProvider.load_from_data(`
             color: ${theme.light.fg};
             background: ${theme.light.bg};
         }
-        .sidebar-${id}:not(.background) {
+        .sidebar-${id} {
             color: ${theme.light.fg};
             background: ${theme.light.sidebar ?? theme.light.bg};
         }
@@ -109,7 +109,7 @@ themeCssProvider.load_from_data(`
             color: ${theme.dark.fg};
             background: ${theme.dark.bg};
         }
-        .is-dark .sidebar-${id}:not(.background) {
+        .is-dark .sidebar-${id} {
             color: ${theme.dark.fg};
             background: ${theme.dark.sidebar ?? theme.dark.bg};
         }
