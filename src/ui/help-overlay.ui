@@ -36,13 +36,13 @@
         </child>
         <child>
           <object class="AdwShortcutsItem">
-            <property name="accelerator">J</property>
+            <property name="accelerator">&lt;shift&gt;j</property>
             <property name="title" translatable="yes">Scroll Down Five Lines</property>
           </object>
         </child>
         <child>
           <object class="AdwShortcutsItem">
-            <property name="accelerator">K</property>
+            <property name="accelerator">&lt;shift&gt;k</property>
             <property name="title" translatable="yes">Scroll Up Five Lines</property>
           </object>
         </child>
