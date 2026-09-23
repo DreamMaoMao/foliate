@@ -541,7 +541,9 @@ export class View extends HTMLElement {
     }
     async * search(opts) {
         this.clearSearch()
-        this.#searchDraw = opts.draw ?? Overlayer.outline
+        this.#searchDraw = typeof opts.draw === 'string'
+            ? Overlayer[opts.draw] ?? Overlayer.outline
+            : opts.draw ?? Overlayer.outline
         this.#searchDrawOptions = opts.drawOptions
         const { searchMatcher } = await import('./search.js')
         const { query, index } = opts

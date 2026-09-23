@@ -390,6 +390,10 @@ class Reader {
         this.view.addEventListener('draw-annotation', e => {
             const { draw, annotation, doc, range } = e.detail
             const { color } = annotation
+            if (annotation.draw && Overlayer[annotation.draw]) {
+                draw(Overlayer[annotation.draw], { color })
+                return
+            }
             if (['underline', 'squiggly', 'strikethrough'].includes(color)) {
                 const { defaultView } = doc
                 const node = range.startContainer
@@ -535,6 +539,20 @@ class Reader {
     // because `FoliateWebView.exec()` can only pass one argument
     scrollBy([x, y]) {
         return this.view.renderer.scrollBy?.(x, y)
+    }
+    // select the given CFI and put it in the middle of the viewport, in one
+    // go: doing it in two steps scrolls twice and flickers
+    async centerCfi(cfi) {
+        await this.view.select(cfi)
+        const { doc } = this.view.renderer?.getContents?.()[0] ?? {}
+        const sel = doc?.getSelection?.()
+        const node = sel?.anchorNode
+        const el = node?.nodeType === 1 ? node : node?.parentElement
+        if (!el) return true
+        // always scroll the match to the middle of the viewport, in a single
+        // instant scroll, so that it cannot flicker
+        el.scrollIntoView?.({ block: 'center', inline: 'nearest', behavior: 'instant' })
+        return true
     }
     snap([x, y]) {
         return this.view.renderer.snap?.(x, y)

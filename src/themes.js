@@ -4,7 +4,7 @@ import { gettext as _ } from 'gettext'
 import * as utils from './utils.js'
 
 // blend `a` over `b`; `t` is how much of `a` to use
-const mixColor = (a, b, t) => {
+export const mixColor = (a, b, t) => {
     const ca = utils.RGBA(a), cb = utils.RGBA(b)
     const hex = n => Math.round((ca[n] * t + cb[n] * (1 - t)) * 255)
         .toString(16).padStart(2, '0')
@@ -121,9 +121,9 @@ themeCssProvider.load_from_data(`
             background: @accent_bg_color;
         }
         .findbar-${id} {
-            background: ${mixColor(theme.light.fg, theme.light.bg, .08)};
+            background: ${mixColor(theme.light.fg, theme.light.bg, .16)};
             color: ${theme.light.fg};
-            border: 1px solid ${mixColor(theme.light.fg, theme.light.bg, .24)};
+            border: 1px solid ${mixColor(theme.light.fg, theme.light.bg, .38)};
             border-radius: 6px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
             padding: 5px;
@@ -137,10 +137,13 @@ themeCssProvider.load_from_data(`
         .findbar-${id} entry:focus-within {
             border-color: ${theme.light.link};
         }
+        .findbar-${id} label {
+            color: ${mixColor(theme.light.fg, theme.light.bg, .9)};
+        }
         .is-dark .findbar-${id} {
-            background: ${mixColor(theme.dark.fg, theme.dark.bg, .08)};
+            background: ${mixColor(theme.dark.fg, theme.dark.bg, .16)};
             color: ${theme.dark.fg};
-            border: 1px solid ${mixColor(theme.dark.fg, theme.dark.bg, .24)};
+            border: 1px solid ${mixColor(theme.dark.fg, theme.dark.bg, .38)};
         }
         .is-dark .findbar-${id} entry {
             background: ${mixColor(theme.dark.fg, theme.dark.bg, .03)};
@@ -149,6 +152,9 @@ themeCssProvider.load_from_data(`
         }
         .is-dark .findbar-${id} entry:focus-within {
             border-color: ${theme.dark.link};
+        }
+        .is-dark .findbar-${id} label {
+            color: ${mixColor(theme.dark.fg, theme.dark.bg, .9)};
         }
     `
 }).join(''), -1)

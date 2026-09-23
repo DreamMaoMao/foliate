@@ -400,6 +400,7 @@ GObject.registerClass({
     forward() { return this.#exec('reader.view.history.forward') }
     search(x) { return this.#webView.iter('reader.view.search', x) }
     clearSearch() { return this.#webView.iter('reader.view.clearSearch') }
+    centerCfi(x) { return this.#exec('reader.centerCfi', x) }
     showAnnotation(x) { return this.#exec('reader.view.showAnnotation', x) }
     addAnnotation(x) { return this.#exec('reader.view.addAnnotation', x) }
     deleteAnnotation(x) { return this.#exec('reader.view.deleteAnnotation', x) }
@@ -539,6 +540,10 @@ export const BookViewer = GObject.registerClass({
     #findIndex = -1
     #findRun = 0
     #findQuery = ''
+    #findSelectAll = false
+    #findCurrentCfi
+    #findOpenedAt = 0
+    #findSeed = false
     constructor(params) {
         super(params)
         utils.connect(this._view, {
@@ -685,7 +690,9 @@ export const BookViewer = GObject.registerClass({
             'stop-search': () => this.hideFindBar(),
         })
         this._find_bar_revealer.connect('notify::child-revealed', revealer => {
-            if (revealer.child_revealed) this._find_entry.grab_focus()
+            if (!revealer.child_revealed) return
+            this._find_entry.grab_focus()
+            this.#selectFindEntry()
         })
         this._find_prev_button.connect('clicked', () => this.findStep(-1))
         this._find_next_button.connect('clicked', () => this.findStep(1))
@@ -1069,12 +1076,48 @@ export const BookViewer = GObject.registerClass({
             this._search_entry.grab_focus()
         }
     }
-    findInSection() {
-        if (this._find_bar_revealer.reveal_child) this.hideFindBar()
-        else {
-            this._find_bar_revealer.reveal_child = true
-            this.find()
+    async findInSection() {
+        // the shortcut is registered on both the window and the web view, so
+        // the action can fire twice for one key press; a second run right away
+        // makes the bar look like it closes and opens again
+        const now = GLib.get_monotonic_time()
+        if (now - (this.#findOpenedAt ?? 0) < 400000) return
+        this.#findOpenedAt = now
+        // like VS Code, Ctrl+F only ever opens the find bar; it is closed with
+        // the close button (or Escape)
+        this.#findSelectAll = true
+        this.#findSeed = true
+        this._find_bar_revealer.reveal_child = true
+        if (this._find_bar_revealer.child_revealed) {
+            this._find_entry.grab_focus()
+            this.#selectFindEntry()
         }
+        // start from the clipboard, selected, so that it can be typed over or
+        // pasted over right away
+        try {
+            const text = await utils.getClipboardText()
+            const query = text?.replace(/\s+/g, ' ').trim()
+            if (query) this._find_entry.text = query
+        } catch (e) {
+            console.error(e)
+        }
+        // setting the text cleared the selection; select it again, and once
+        // more on the next idle so it survives the focus arriving late
+        this._find_entry.grab_focus()
+        this._find_entry.select_region(0, -1)
+        GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            this._find_entry.grab_focus()
+            this._find_entry.select_region(0, -1)
+            return GLib.SOURCE_REMOVE
+        })
+        this.find()
+    }
+    // selecting has to happen after the entry is focused and revealed, or the
+    // selection gets cleared when the focus arrives
+    #selectFindEntry() {
+        if (!this.#findSelectAll) return
+        this.#findSelectAll = false
+        this._find_entry.select_region(0, -1)
     }
     hideFindBar() {
         this._find_bar_revealer.reveal_child = false
@@ -1082,15 +1125,25 @@ export const BookViewer = GObject.registerClass({
         this.#findMatches = []
         this.#findIndex = -1
         this.#updateFindStatus()
+        if (this.#findCurrentCfi) {
+            this._view.deleteAnnotation({ value: this.#findCurrentCfi })
+            this.#findCurrentCfi = null
+        }
         this._view.clearSearch()
-        this._view.deselect()
     }
     find() {
         const query = this._find_entry.text.trim()
+        // the entry also emits search-changed for the text we set ourselves;
+        // searching twice scrolls twice, which shows up as a jitter
+        if (query === this.#findQuery && this.#findMatches.length) return
         const run = ++this.#findRun
         this.#findQuery = query
         this.#findMatches = []
         this.#findIndex = -1
+        if (this.#findCurrentCfi) {
+            this._view.deleteAnnotation({ value: this.#findCurrentCfi })
+            this.#findCurrentCfi = null
+        }
         this.#updateFindStatus()
         if (!query) {
             this._view.clearSearch()
@@ -1100,7 +1153,15 @@ export const BookViewer = GObject.registerClass({
             .catch(e => console.error(e))
     }
     async #runFind(run, query, index) {
-        const iter = await this._view.search({ query, index })
+        const { other } = this.#findColors()
+        const iter = await this._view.search({
+            query, index,
+            // box all matches, and give the current one its own color
+            // (drawn separately, see below). Outlines stay crisp where a
+            // translucent fill looks blurry on top of the text
+            draw: 'outline',
+            drawOptions: { color: other, width: 2 },
+        })
         for await (const result of iter) {
             if (run !== this.#findRun) return
             if (result === 'done' || 'progress' in result) continue
@@ -1109,16 +1170,45 @@ export const BookViewer = GObject.registerClass({
         if (run !== this.#findRun) return
         if (this.#findMatches.length) {
             this.#findIndex = 0
-            this._view.select(this.#findMatches[0])
+            // wait for the jump: it focuses the book view, which would clear
+            // the selection again if we set it before this finishes
+            await this.#showFindMatch()
         }
         this.#updateFindStatus()
+        // only when the bar was just opened: the jump focuses the book view
+        // and drops the selection, so put it back. Typing later must not
+        // select anything, or the next key press would replace what is typed
+        if (this.#findSeed) {
+            this.#findSeed = false
+            this._find_entry.grab_focus()
+            this._find_entry.select_region(0, -1)
+        }
     }
     findStep(delta) {
         const n = this.#findMatches.length
         if (!n) return
         this.#findIndex = (this.#findIndex + delta + n) % n
-        this._view.select(this.#findMatches[this.#findIndex])
+        this.#showFindMatch()
         this.#updateFindStatus()
+    }
+    #findColors() {
+        // other matches: warm yellow; the current match: red
+        return { other: '#ac9259', current: '#fb4934' }
+    }
+    #showFindMatch() {
+        const cfi = this.#findMatches[this.#findIndex]
+        if (this.#findCurrentCfi && this.#findCurrentCfi !== cfi)
+            this._view.deleteAnnotation({ value: this.#findCurrentCfi })
+        this.#findCurrentCfi = cfi
+        if (!cfi) return
+        // the current match gets its own color, then the view is moved to it
+        // without selecting the text, so the match stays visible
+        this._view.addAnnotation({
+            value: cfi,
+            color: this.#findColors().current,
+            draw: 'outline',
+        })
+        return this._view.centerCfi(cfi).catch(e => console.error(e))
     }
     #updateFindStatus() {
         const n = this.#findMatches.length
