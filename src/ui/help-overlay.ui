@@ -71,7 +71,7 @@
         <property name="title" translatable="yes">Sidebar</property>
         <child>
           <object class="AdwShortcutsItem">
-            <property name="accelerator">F9</property>
+            <property name="accelerator">&lt;ctrl&gt;b F9</property>
             <property name="title" translatable="yes">Toggle Sidebar</property>
           </object>
         </child>

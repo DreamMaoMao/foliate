@@ -796,7 +796,7 @@ export const BookViewer = GObject.registerClass({
         this.insert_action_group('view', this._view.actionGroup)
         this.insert_action_group('viewer', actions)
         const shortcuts = {
-            'F9': 'viewer.toggle-sidebar',
+            '<ctrl>b|F9': 'viewer.toggle-sidebar',
             '<ctrl>f': 'viewer.find-in-section',
             '<ctrl><shift>f|slash': 'viewer.toggle-search',
             '<ctrl>l': 'viewer.show-location',
