@@ -444,6 +444,8 @@ export class Paginator extends HTMLElement {
     #justAnchored = false
     #locked = false // while true, prevent any further navigation
     #styles
+    #scrollbar
+    #scrollbarThumb
     #styleMap = new WeakMap()
     #mediaQuery = matchMedia('(prefers-color-scheme: dark)')
     #mediaQueryListener
@@ -526,6 +528,35 @@ export class Paginator extends HTMLElement {
             width: 0;
             height: 0;
         }
+        :host {
+            position: relative;
+        }
+        #scrollbar {
+            position: absolute;
+            z-index: 3;
+            top: 0;
+            right: 0;
+            width: 14px;
+            height: 100%;
+            opacity: 0;
+            transition: opacity .15s;
+        }
+        #scrollbar.visible, #scrollbar.dragging {
+            opacity: 1;
+        }
+        #scrollbar > div {
+            position: absolute;
+            left: 3px;
+            width: 8px;
+            border-radius: 4px;
+            background: rgba(128, 128, 128, .45);
+        }
+        #scrollbar:hover > div {
+            background: rgba(128, 128, 128, .8);
+        }
+        :host(:not([flow="scrolled"])) #scrollbar {
+            display: none;
+        }
         /* a wide, draggable scrollbar whose thumb only shows up when the
            pointer is over it */
         :host([flow="scrolled"]) #container::-webkit-scrollbar {
@@ -580,6 +611,52 @@ export class Paginator extends HTMLElement {
         this.#top = this.#root.getElementById('top')
         this.#background = this.#root.getElementById('background')
         this.#container = this.#root.getElementById('container')
+        {
+            const bar = document.createElement('div')
+            bar.id = 'scrollbar'
+            const thumb = document.createElement('div')
+            bar.append(thumb)
+            this.#root.append(bar)
+            this.#scrollbar = bar
+            this.#scrollbarThumb = thumb
+            let dragging = false
+            let grab = 0
+            const update = () => this.#updateScrollbar()
+            const toScroll = e => {
+                const el = this.#container
+                const span = el.scrollHeight - el.clientHeight
+                const max = bar.clientHeight - thumb.offsetHeight
+                if (span <= 0 || max <= 0) return
+                const y = e.clientY - bar.getBoundingClientRect().top - grab
+                el.scrollTop = Math.max(0, Math.min(1, y / max)) * span
+            }
+            bar.addEventListener('pointerdown', e => {
+                const r = thumb.getBoundingClientRect()
+                grab = e.target === thumb ? e.clientY - r.top : r.height / 2
+                dragging = true
+                bar.classList.add('dragging')
+                bar.setPointerCapture(e.pointerId)
+                toScroll(e)
+                e.preventDefault()
+                e.stopPropagation()
+            })
+            bar.addEventListener('pointermove', e => {
+                if (dragging) { toScroll(e); e.stopPropagation() }
+            })
+            const stop = e => {
+                dragging = false
+                bar.classList.remove('dragging')
+                bar.releasePointerCapture?.(e.pointerId)
+            }
+            bar.addEventListener('pointerup', stop)
+            bar.addEventListener('pointercancel', stop)
+            bar.addEventListener('pointerenter', () => bar.classList.add('visible'))
+            bar.addEventListener('pointerleave', () => {
+                if (!dragging) bar.classList.remove('visible')
+            })
+            this.#container.addEventListener('scroll', update, { passive: true })
+            new ResizeObserver(update).observe(this.#container)
+        }
         this.#header = this.#root.getElementById('header')
         this.#footer = this.#root.getElementById('footer')
 
@@ -805,6 +882,23 @@ export class Paginator extends HTMLElement {
     }
     get viewSize() {
         return this.#view.element.getBoundingClientRect()[this.sideProp]
+    }
+    #updateScrollbar() {
+        const bar = this.#scrollbar
+        const thumb = this.#scrollbarThumb
+        const el = this.#container
+        if (!bar || !thumb || !el) return
+        const total = el.scrollHeight
+        const view = el.clientHeight
+        if (!this.scrolled || total <= view + 1) {
+            bar.style.display = 'none'
+            return
+        }
+        bar.style.display = ''
+        const h = Math.max(28, Math.round(view * view / total))
+        const max = bar.clientHeight - h
+        thumb.style.height = `${h}px`
+        thumb.style.top = `${Math.round((el.scrollTop / (total - view)) * max)}px`
     }
     get start() {
         return Math.abs(this.#container[this.scrollProp])
