@@ -404,7 +404,7 @@ GObject.registerClass({
     search(x) { return this.#webView.iter('reader.view.search', x) }
     clearSearch() { return this.#webView.iter('reader.view.clearSearch') }
     centerCfi(x) { return this.#exec('reader.centerCfi', x) }
-    countChars() { return this.#exec('reader.countChars') }
+    countChars() { return this.#webView.iter('reader.countChars') }
     showAnnotation(x) { return this.#exec('reader.view.showAnnotation', x) }
     addAnnotation(x) { return this.#exec('reader.view.addAnnotation', x) }
     deleteAnnotation(x) { return this.#exec('reader.view.deleteAnnotation', x) }
@@ -911,13 +911,7 @@ export const BookViewer = GObject.registerClass({
         this._toc_view.setCurrent(tocItem?.id)
         this._search_view.index = section.current
         this._navbar.update(payload)
-        this._view.countChars()
-            .then(result => {
-                const n = Number(result?.value ?? result)
-                if (!Number.isFinite(n)) return console.debug('char count not a number:', result)
-                this._word_count.label = _('Words in This Chapter: %d').replace('%d', n)
-            })
-            .catch(e => console.error(e))
+        this.#updateWordCount().catch(e => console.error(e))
         this._bookmark_view.update(payload)
         this._annotation_view.update(payload)
         if (this.#data) {
@@ -1096,6 +1090,17 @@ export const BookViewer = GObject.registerClass({
             bar.search_mode_enabled = true
             this._flap.show_sidebar = true
             this._search_entry.grab_focus()
+        }
+    }
+    async #updateWordCount() {
+        // read through the iterator bridge, which is the one that carries
+        // values back from the reader; exec() is fire and forget
+        const iter = await this._view.countChars()
+        for await (const value of iter) {
+            const n = Number(value)
+            if (Number.isFinite(n))
+                this._word_count.label = _('Words in This Chapter: %d').replace('%d', n)
+            break
         }
     }
     // shift+J/K: scroll five lines, by repeating the view's own one-line scroll
