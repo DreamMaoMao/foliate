@@ -1095,10 +1095,14 @@ export const BookViewer = GObject.registerClass({
     async #updateWordCount() {
         // read through the iterator bridge, which is the one that carries
         // values back from the reader; exec() is fire and forget
+        // the template child lookup for this id does not resolve, so find the
+        // label by its position: it is the navbar's next sibling
+        const label = this._word_count ?? this._navbar.get_next_sibling()
+        if (!label) return
         const it = await this._view.countChars()
         const { value } = await it.next()
         const n = Number(value?.value ?? value)
-        if (Number.isFinite(n)) this._word_count.label = `本章字数：${n}`
+        if (Number.isFinite(n)) label.label = `本章字数：${n}`
         else console.debug('word count:', value)
     }
     // shift+J/K: scroll five lines, by repeating the view's own one-line scroll
