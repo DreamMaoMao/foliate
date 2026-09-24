@@ -36,7 +36,7 @@
         </child>
         <child>
           <object class="AdwShortcutsItem">
-            <property name="accelerator">f</property>
+            <property name="accelerator">f F11</property>
             <property name="title" translatable="yes">Toggle Fullscreen</property>
           </object>
         </child>
@@ -148,12 +148,6 @@
         </child>
         <child>
           <object class="AdwShortcutsItem">
-            <property name="accelerator">F11</property>
-            <property name="title" translatable="yes">Toggle Fullscreen</property>
-          </object>
-        </child>
-        <child>
-          <object class="AdwShortcutsItem">
             <property name="accelerator">&lt;ctrl&gt;m</property>
             <property name="title" translatable="yes">Toggle Scrolled Mode</property>
           </object>
@@ -225,12 +219,6 @@
           <object class="AdwShortcutsItem">
             <property name="accelerator">&lt;ctrl&gt;c</property>
             <property name="title" translatable="yes">Selection Copy</property>
-          </object>
-        </child>
-        <child>
-          <object class="AdwShortcutsItem">
-            <property name="accelerator">&lt;ctrl&gt;&lt;shift&gt;f</property>
-            <property name="title" translatable="yes">Selection Search</property>
           </object>
         </child>
       </object>
