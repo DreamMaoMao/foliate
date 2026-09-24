@@ -1188,7 +1188,6 @@ export const BookViewer = GObject.registerClass({
         const { value } = await it.next()
         const n = Number(value?.value ?? value)
         if (Number.isFinite(n)) label.label = `（本章字数：${n}）`
-        else console.debug('word count:', value)
     }
     // shift+J/K: scroll five lines, by repeating the view's own one-line scroll
     #scrollLines(dir) {

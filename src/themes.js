@@ -93,6 +93,12 @@ themeCssProvider.load_from_data(`
     .theme-container .card {
         padding: 9px;
     }
+    /* libadwaita draws a dimming layer over the page when the sidebar slides
+       in; its CSS node is "dimming" under "overlay-split-view" (with dashes,
+       as printed by the widget tree dump) */
+    overlay-split-view > dimming {
+        background: none;
+    }
 ` + themes.map(theme => {
     const id = `theme-${GLib.uuid_string_random()}`
     theme.id = id
