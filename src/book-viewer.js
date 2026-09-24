@@ -62,6 +62,7 @@ const ViewSettings = utils.makeDataClass('FoliateViewSettings', {
     'override-font': 'boolean',
     'selection-menu-on-right-click': 'boolean',
     'pin-headerbar': 'boolean',
+    'zoom-level': 'double',
 })
 
 const FontSettings = utils.makeDataClass('FoliateFontSettings', {
@@ -579,8 +580,23 @@ export const BookViewer = GObject.registerClass({
         utils.bindSettings('viewer', this, ['fold-sidebar', 'highlight-color'])
         this._view.fontSettings.bindSettings('viewer.font')
         this._view.viewSettings.bindSettings('viewer.view')
-        this._view.webView.connect('notify::zoom-level', webView =>
-            this._zoom_button.label = format.percent(webView.zoom_level))
+        this._view.webView.connect('notify::zoom-level', webView => {
+            this._zoom_button.label = format.percent(webView.zoom_level)
+            // remember it, so that reopening the book keeps the zoom
+            this._view.viewSettings.zoom_level = webView.zoom_level
+        })
+        // ctrl + wheel zooms, like in a browser
+        this._view.webView.add_controller(utils.connect(new Gtk.EventControllerScroll({
+            flags: Gtk.EventControllerScrollFlags.VERTICAL,
+        }), {
+            'scroll': (controller, dx, dy) => {
+                if (!(controller.get_current_event_state() & Gdk.ModifierType.CONTROL_MASK))
+                    return false
+                if (dy < 0) this._view.zoomIn()
+                else if (dy > 0) this._view.zoomOut()
+                return true
+            },
+        }))
         this._zoom_button.label = format.percent(this._view.webView.zoom_level)
 
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(),
@@ -932,6 +948,9 @@ export const BookViewer = GObject.registerClass({
         this._book_author.label = formatAuthors(book.metadata)
         this._book_author.visible = !!this._book_author.label
         this.root.title = this._book_title.label
+        // restore the remembered zoom level
+        const zoom = this._view.viewSettings.zoom_level
+        if (zoom > 0) this._view.webView.zoom_level = zoom
 
         const { language: { direction } } = reader.view
         utils.setDirection(this._book_info, direction)
