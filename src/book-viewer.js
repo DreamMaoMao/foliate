@@ -550,6 +550,8 @@ export const BookViewer = GObject.registerClass({
     #findCurrentCfi
     #findOpenedAt = 0
     #findSeed = false
+    #sidebarByHover = false
+    #hoverX = Infinity
     constructor(params) {
         super(params)
         utils.connect(this._view, {
@@ -659,18 +661,30 @@ export const BookViewer = GObject.registerClass({
         // reveal the sidebar when the pointer touches the left edge, and hide
         // it again when the pointer leaves it. Only tracks sidebars that were
         // opened by hovering, so Ctrl+B and folded sidebars are unaffected
-        let sidebarByHover = false
+        // whichever code path wants to close the sidebar: if it was opened by
+        // hovering and the pointer is still inside it, keep it open instead
         this._flap.connect('notify::show-sidebar', flap => {
-            if (!flap.show_sidebar) sidebarByHover = false
+            if (flap.show_sidebar) return
+            const width = this._flap.max_sidebar_width || 300
+            if (this.#sidebarByHover && this.#hoverX < width + 24) {
+                flap.show_sidebar = true
+                return
+            }
+            this.#sidebarByHover = false
         })
         this.add_controller(utils.connect(new Gtk.EventControllerMotion(), {
             'motion': (_, x, y) => {
-                const width = this._flap.sidebar_width
-                if (this._flap.collapsed && x < 24) {
-                    if (!this._flap.show_sidebar) sidebarByHover = true
+                this.#hoverX = x
+                // the sidebar widget reports 0 when hidden, so use the width
+                // foliate actually applies to the split view
+                const width = this._flap.max_sidebar_width || 300
+                if (x < 24) {
+                    if (!this._flap.show_sidebar) this.#sidebarByHover = true
                     this._flap.show_sidebar = true
-                } else if (sidebarByHover && x > width + 24) {
-                    sidebarByHover = false
+                // fold-sidebar true means the sidebar is folded away (not
+                // pinned); only then does it get hidden again automatically
+                } else if (this.fold_sidebar && this.#sidebarByHover && x > width + 24) {
+                    this.#sidebarByHover = false
                     this._flap.show_sidebar = false
                 }
             },
@@ -705,7 +719,15 @@ export const BookViewer = GObject.registerClass({
             'clear-results': () => this._view.clearSearch(),
             'show-cfi': (_, cfi) => {
                 this._view.select(cfi)
-                if (this._flap.collapsed) this._flap.show_sidebar = false
+                if (this._flap.collapsed) {
+                    this._flap.show_sidebar = false
+                    // keep it open if it was revealed by hovering and the
+                    // pointer is still inside the sidebar
+                    if (this.#sidebarByHover) {
+                        const width = this._flap.max_sidebar_width || 300
+                        if (this.#hoverX < width + 24) this._flap.show_sidebar = true
+                    }
+                }
             },
         })
         this.insert_action_group('search', this._search_view.actionGroup)
@@ -776,13 +798,29 @@ export const BookViewer = GObject.registerClass({
             },
             'go-to-bookmark': (_, target) => {
                 this._view.goTo(target)
-                if (this._flap.collapsed) this._flap.show_sidebar = false
+                if (this._flap.collapsed) {
+                    this._flap.show_sidebar = false
+                    // keep it open if it was revealed by hovering and the
+                    // pointer is still inside the sidebar
+                    if (this.#sidebarByHover) {
+                        const width = this._flap.max_sidebar_width || 300
+                        if (this.#hoverX < width + 24) this._flap.show_sidebar = true
+                    }
+                }
             },
         })
         utils.connect(this._annotation_view, {
             'go-to-annotation': (_, annotation) => {
                 this._view.showAnnotation(annotation)
-                if (this._flap.collapsed) this._flap.show_sidebar = false
+                if (this._flap.collapsed) {
+                    this._flap.show_sidebar = false
+                    // keep it open if it was revealed by hovering and the
+                    // pointer is still inside the sidebar
+                    if (this.#sidebarByHover) {
+                        const width = this._flap.max_sidebar_width || 300
+                        if (this.#hoverX < width + 24) this._flap.show_sidebar = true
+                    }
+                }
             },
             'delete-annotation': (_, annotation) =>
                 this.#deleteAnnotation(annotation),
