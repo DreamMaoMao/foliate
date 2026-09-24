@@ -656,6 +656,25 @@ export const BookViewer = GObject.registerClass({
         if (pinHeaderbar()) this._headerbar_revealer.reveal_child = true
         const autohideNavbar = autohide(this._navbar_revealer,
             () => this._navbar.shouldStayVisible)
+        // reveal the sidebar when the pointer touches the left edge, and hide
+        // it again when the pointer leaves it. Only tracks sidebars that were
+        // opened by hovering, so Ctrl+B and folded sidebars are unaffected
+        let sidebarByHover = false
+        this._flap.connect('notify::show-sidebar', flap => {
+            if (!flap.show_sidebar) sidebarByHover = false
+        })
+        this.add_controller(utils.connect(new Gtk.EventControllerMotion(), {
+            'motion': (_, x, y) => {
+                const width = this._flap.sidebar_width
+                if (this._flap.collapsed && x < 24) {
+                    if (!this._flap.show_sidebar) sidebarByHover = true
+                    this._flap.show_sidebar = true
+                } else if (sidebarByHover && x > width + 24) {
+                    sidebarByHover = false
+                    this._flap.show_sidebar = false
+                }
+            },
+        }))
         // the header bar's own motion controller only covers the areas where
         // its buttons live once it is hidden, so add our own hot zone: any
         // pointer near the top of the view reveals it, centre included
