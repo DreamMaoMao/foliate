@@ -656,6 +656,14 @@ export const BookViewer = GObject.registerClass({
         if (pinHeaderbar()) this._headerbar_revealer.reveal_child = true
         const autohideNavbar = autohide(this._navbar_revealer,
             () => this._navbar.shouldStayVisible)
+        // the header bar's own motion controller only covers the areas where
+        // its buttons live once it is hidden, so add our own hot zone: any
+        // pointer near the top of the view reveals it, centre included
+        this.add_controller(utils.connect(new Gtk.EventControllerMotion(), {
+            'motion': (_, x, y) => {
+                if (y < 48) autohideHeaderbar.show()
+            },
+        }))
         this._view_popover.connect('closed', autohideHeaderbar.hide)
         this._bookmark_button.connect('clicked', autohideHeaderbar.hide)
         this._navbar.connect('closed', autohideNavbar.hide)
