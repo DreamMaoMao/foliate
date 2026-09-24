@@ -540,16 +540,18 @@ class Reader {
     scrollBy([x, y]) {
         return this.view.renderer.scrollBy?.(x, y)
     }
-    // jump to the first / last element of the current chapter
+    // jump to the start / end of the current chapter, through the engine's own
+    // navigation, so that it lands exactly in both paged and scrolled modes
     sectionStart() {
-        const { doc } = this.view.renderer?.getContents?.()[0] ?? {}
-        doc?.body?.firstElementChild?.scrollIntoView?.({ block: 'start', behavior: 'instant' })
-        return true
+        const { index } = this.view.renderer?.getContents?.()[0] ?? {}
+        if (index == null) return false
+        return this.view.goTo({ index, anchor: 0 })
     }
     sectionEnd() {
-        const { doc } = this.view.renderer?.getContents?.()[0] ?? {}
-        doc?.body?.lastElementChild?.scrollIntoView?.({ block: 'end', behavior: 'instant' })
-        return true
+        const { index, doc } = this.view.renderer?.getContents?.()[0] ?? {}
+        if (index == null) return false
+        const last = doc?.body?.lastElementChild
+        return this.view.goTo(last ? { index, anchor: last } : { index, anchor: 'end' })
     }
     // character count of the current chapter, like countch.py: every
     // non-whitespace character counts as one

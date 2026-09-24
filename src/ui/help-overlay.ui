@@ -113,7 +113,7 @@
         </child>
         <child>
           <object class="AdwShortcutsItem">
-            <property name="accelerator">slash &lt;ctrl&gt;&lt;shift&gt;f</property>
+            <property name="accelerator">&lt;ctrl&gt;&lt;shift&gt;f</property>
             <property name="title" translatable="yes">Toggle Search</property>
           </object>
         </child>
@@ -177,7 +177,7 @@
         <property name="title" translatable="yes">Find Bar</property>
         <child>
           <object class="AdwShortcutsItem">
-            <property name="accelerator">&lt;ctrl&gt;f</property>
+            <property name="accelerator">&lt;ctrl&gt;f slash</property>
             <property name="title" translatable="yes">Find in This Section</property>
           </object>
         </child>
