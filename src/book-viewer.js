@@ -661,7 +661,10 @@ export const BookViewer = GObject.registerClass({
         // pointer near the top of the view reveals it, centre included
         this.add_controller(utils.connect(new Gtk.EventControllerMotion(), {
             'motion': (_, x, y) => {
+                // in the top strip: show it; out of it: let the normal
+                // hide-if-not-needed logic run, so it goes away again
                 if (y < 48) autohideHeaderbar.show()
+                else autohideHeaderbar.sync()
             },
         }))
         this._view_popover.connect('closed', autohideHeaderbar.hide)
