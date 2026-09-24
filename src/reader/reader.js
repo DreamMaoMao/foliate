@@ -540,6 +540,17 @@ class Reader {
     scrollBy([x, y]) {
         return this.view.renderer.scrollBy?.(x, y)
     }
+    // jump to the first / last element of the current chapter
+    sectionStart() {
+        const { doc } = this.view.renderer?.getContents?.()[0] ?? {}
+        doc?.body?.firstElementChild?.scrollIntoView?.({ block: 'start', behavior: 'instant' })
+        return true
+    }
+    sectionEnd() {
+        const { doc } = this.view.renderer?.getContents?.()[0] ?? {}
+        doc?.body?.lastElementChild?.scrollIntoView?.({ block: 'end', behavior: 'instant' })
+        return true
+    }
     // character count of the current chapter, like countch.py: every
     // non-whitespace character counts as one
     async * countChars() {

@@ -24,6 +24,24 @@
         </child>
         <child>
           <object class="AdwShortcutsItem">
+            <property name="accelerator">g</property>
+            <property name="title" translatable="yes">Jump to Chapter Start</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwShortcutsItem">
+            <property name="accelerator">&lt;shift&gt;g</property>
+            <property name="title" translatable="yes">Jump to Chapter End</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwShortcutsItem">
+            <property name="accelerator">f</property>
+            <property name="title" translatable="yes">Toggle Fullscreen</property>
+          </object>
+        </child>
+        <child>
+          <object class="AdwShortcutsItem">
             <property name="accelerator">j Down</property>
             <property name="title" translatable="yes">Scroll Down</property>
           </object>

@@ -405,6 +405,8 @@ GObject.registerClass({
     clearSearch() { return this.#webView.iter('reader.view.clearSearch') }
     centerCfi(x) { return this.#exec('reader.centerCfi', x) }
     countChars() { return this.#webView.iter('reader.countChars') }
+    sectionStart() { return this.#exec('reader.sectionStart') }
+    sectionEnd() { return this.#exec('reader.sectionEnd') }
     showAnnotation(x) { return this.#exec('reader.view.showAnnotation', x) }
     addAnnotation(x) { return this.#exec('reader.view.addAnnotation', x) }
     deleteAnnotation(x) { return this.#exec('reader.view.deleteAnnotation', x) }
@@ -822,6 +824,12 @@ export const BookViewer = GObject.registerClass({
             'j|Down|KP_Down': 'view.scroll-down',
             '<shift>k': () => this.#scrollLines(-1),
             '<shift>j': () => this.#scrollLines(1),
+            'g': () => this._view.sectionStart(),
+            '<shift>g': () => this._view.sectionEnd(),
+            'f': () => {
+                const win = this.get_root()
+                if (win) win.fullscreened = !win.fullscreened
+            },
             'h|Left|KP_Left': 'view.go-left',
             'l|Right|KP_Right': 'view.go-right',
             '<alt>Left|<alt>KP_Left': 'view.back',
