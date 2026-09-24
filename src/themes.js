@@ -4,7 +4,7 @@ import { gettext as _ } from 'gettext'
 import * as utils from './utils.js'
 
 // blend `a` over `b`; `t` is how much of `a` to use
-export const mixColor = (a, b, t) => {
+const mixColor = (a, b, t) => {
     const ca = utils.RGBA(a), cb = utils.RGBA(b)
     const hex = n => Math.round((ca[n] * t + cb[n] * (1 - t)) * 255)
         .toString(16).padStart(2, '0')
