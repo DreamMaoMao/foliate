@@ -911,6 +911,14 @@ export class Paginator extends HTMLElement {
     get pages() {
         return Math.round(this.viewSize / this.size)
     }
+    // scroll to the very start / end of the content in the container; in
+    // scrolled mode the container holds only the current section
+    scrollToEdge(where) {
+        const el = this.#container
+        if (!el) return false
+        el.scrollTop = where === 'end' ? el.scrollHeight : 0
+        return true
+    }
     scrollBy(dx, dy) {
         const delta = this.#vertical ? dy : dx
         const element = this.#container

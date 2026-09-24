@@ -540,18 +540,33 @@ class Reader {
     scrollBy([x, y]) {
         return this.view.renderer.scrollBy?.(x, y)
     }
-    // jump to the start / end of the current chapter, through the engine's own
-    // navigation, so that it lands exactly in both paged and scrolled modes
+    // jump to the start / end of the current chapter
+    // NOTE: keep this inside the reader: an Element anchor can't cross the
+    // webview bridge (the args are serialised as JSON)
     sectionStart() {
-        const { index } = this.view.renderer?.getContents?.()[0] ?? {}
-        if (index == null) return false
-        return this.view.goTo({ index, anchor: 0 })
+        const renderer = this.view.renderer
+        if (renderer?.scrolled && renderer.scrollToEdge) return renderer.scrollToEdge('start')
+        const { doc } = renderer?.getContents?.()[0] ?? {}
+        doc?.body?.firstElementChild?.scrollIntoView?.({ block: 'start', behavior: 'instant' })
+        return true
     }
     sectionEnd() {
-        const { index, doc } = this.view.renderer?.getContents?.()[0] ?? {}
-        if (index == null) return false
-        const last = doc?.body?.lastElementChild
-        return this.view.goTo(last ? { index, anchor: last } : { index, anchor: 'end' })
+        const renderer = this.view.renderer
+        if (renderer?.scrolled && renderer.scrollToEdge) return renderer.scrollToEdge('end')
+        const { doc } = renderer?.getContents?.()[0] ?? {}
+        const el = doc?.body?.lastElementChild
+        if (!el) return false
+        el.scrollIntoView?.({ block: 'end', inline: 'nearest', behavior: 'instant' })
+        // the container keeps a gutter at the bottom (room for the footer), so
+        // the last line can stay just below the fold; if only that small gap
+        // is left, close it by scrolling the container to its end
+        const container = this.view.renderer?.shadowRoot?.getElementById?.('container')
+        if (container) {
+            const gap = container.scrollHeight - (container.scrollTop + container.clientHeight)
+            if (gap > 0 && gap < container.clientHeight * 0.15)
+                container.scrollTop = container.scrollHeight
+        }
+        return true
     }
     // character count of the current chapter, like countch.py: every
     // non-whitespace character counts as one
