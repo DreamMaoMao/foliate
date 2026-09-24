@@ -21,6 +21,20 @@
             </object>
           </child>
           <child>
+            <object class="AdwSpinRow" id="font-weight">
+              <property name="title" translatable="yes">Font Weight</property>
+              <property name="subtitle" translatable="yes">400 is regular, 500 medium, 700 bold</property>
+              <property name="adjustment">
+                <object class="GtkAdjustment">
+                  <property name="lower">100</property>
+                  <property name="upper">900</property>
+                  <property name="step-increment">100</property>
+                  <property name="page-increment">100</property>
+                </object>
+              </property>
+            </object>
+          </child>
+          <child>
             <object class="AdwSpinRow" id="minimum-font-size">
               <property name="title" translatable="yes">Minimum Font Size</property>
               <property name="adjustment">
@@ -160,12 +174,12 @@
           <child>
             <object class="AdwSpinRow" id="gap">
               <property name="title" translatable="yes">Margins</property>
-              <property name="digits">2</property>
+              <property name="digits">3</property>
               <property name="adjustment">
                 <object class="GtkAdjustment">
                   <property name="lower">0</property>
                   <property name="upper">0.5</property>
-                  <property name="step-increment">0.01</property>
+                  <property name="step-increment">0.001</property>
                   <property name="page-increment">0.01</property>
                 </object>
               </property>
@@ -192,7 +206,7 @@
                 <object class="GtkAdjustment">
                   <property name="lower">100</property>
                   <property name="upper">5000</property>
-                  <property name="step-increment">60</property>
+                  <property name="step-increment">10</property>
                   <property name="page-increment">60</property>
                 </object>
               </property>
@@ -206,7 +220,7 @@
                 <object class="GtkAdjustment">
                   <property name="lower">100</property>
                   <property name="upper">5000</property>
-                  <property name="step-increment">60</property>
+                  <property name="step-increment">10</property>
                   <property name="page-increment">60</property>
                 </object>
               </property>

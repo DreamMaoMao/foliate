@@ -50,6 +50,7 @@ const getHTML = async range => {
 
 const getCSS = ({
     lineHeight, justify, hyphenate, invert, theme, overrideFont, userStylesheet,
+    fontWeight,
     mediaActiveClass,
 }) => {
     // A theme can define its own background color for selected text; otherwise
@@ -204,6 +205,8 @@ const getCSS = ({
         hyphens: ${hyphenate ? 'auto' : 'none'};
     }
     ${overrideFont ? '* { font-family: revert !important }' : ''}
+    ${fontWeight && fontWeight !== 400
+        ? `body, p, li, blockquote, dd { font-weight: ${fontWeight} !important }` : ''}
 ` + userStylesheet]
 }
 
